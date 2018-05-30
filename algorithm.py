@@ -18,7 +18,15 @@ def Distance(city1,city2):
 
 	return nearestInt
 
-
+# Output function lists the length first, then path.  Include .tour with f_name
+def output_tour(arr,len,f_name):
+	f_out = open(f_name,"w+")
+	#writes length of walk in the first line
+	f_out.write(len+"\n")
+	#lists the walk
+	for i in arr:
+		f_out.write("%s\n" % i)
+	f_out.close()
 
 def Main():
 
