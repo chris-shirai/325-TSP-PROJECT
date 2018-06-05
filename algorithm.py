@@ -28,6 +28,8 @@ def output_tour(arr,len,f_name):
         f_out.write("%s\n" % i)
     f_out.close()
 
+# This function takes a route with the starting vertex of 2 edges
+# and returns a modified array with the routes swapped
 def improve2opt(route,i,k):
     new_route = []
     new_route.extend(route[:i])
@@ -35,13 +37,16 @@ def improve2opt(route,i,k):
     new_route.extend(route[k+1:])
 
     return new_route
-#test comment
+
+# calculates the total distance of a route
 def calcTotalDist(route):
     var = 0
     for line in range(len(route)):
         if line == 0:
+            # distance from last vertex to 0
             var += Distance(route[0],route[len(route)-1])
         else:
+            # distance from previous vertex to this
             var += Distance(route[line-1],route[line])
     return var
 
@@ -55,49 +60,54 @@ def Main():
         cities = f.read().splitlines()
 
         for line in range(len(cities)):
-
+            # split the line into separate elements
             cities[line] = list(map(int, cities[line].split()))
-            print(cities[line])
 
-    
         # Now we have our info in cities[].
         # cities[line[0]]: City ID
         # cities[line[1]]: x-coord
         # cities[line[2]]: y-coord
 
+        # get the initial total distance
         totalDist = calcTotalDist(cities)
-        #print(totalDist)
-
-        #bestDist = totalDist
+ 
         improvement = True
         while improvement:
+
+            # [for testing purposes]
             print(totalDist)
+
+            # initialize to false
             improvement = False
+
             for i in range(1, len(cities)-1):
                 for k in range(i+1, len(cities)):
+
+                    # create a new route with 2-opt switch
                     newRoute = improve2opt(cities,i,k)
-                    #print(newRoute)
+
+                    # calculate distance of new route
                     newDist = calcTotalDist(newRoute)
+
+                    # see if this is an improvement
                     if newDist < totalDist:
+                        # save the distance and new routes
                         totalDist = newDist
                         cities = newRoute
+
+                        # we need to loop again
                         improvement = True
+
+                        # [for testing]
                         print("Found improvement. i=" + str(i) + " , k=" + str(k))
-                        break
-                    #print("increasing k")
+
+                        break # exit up the chain to repeat the loop
+                    
                     k += 1
                 if improvement:
-                    break
-                #print("increasing i")
+                    break # exit up the chain to repeat the loop
+                
                 i += 1
-
-
-
-
-        # Note: the distance of each city is the distance to get to the next city.
-
-        # test Distance function
-        # print(Distance(cities[1],cities[2])) #should print 1118
 
 if __name__ == "__main__":
     Main()
