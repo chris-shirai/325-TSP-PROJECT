@@ -8,9 +8,10 @@ import sys
 import math # for sqrt()
 from copy import deepcopy
 
-#for testing purposes
+### FOR TESTING PURPOSES
 import time 
 start_time = time.time()
+### END TESTING
 
 # Distance function takes two of a city argument: list containing ID and coords
 def Distance(city1,city2):
@@ -61,7 +62,7 @@ def nearest_neighbor(arr):
     nn_path = [] #append the near neighbor path to empty list, return it
     cities_length = len(arr) #of cities
     #DELETE TO SEE DIST tmp_nearest_dist_arr = []
-    for i in range(cities_length-1):
+    for i in range(cities_length):
         print(i)
         curr_city = tmp_city.pop(0) #takes current city aka visited
         nn_path.append(curr_city)
@@ -76,9 +77,13 @@ def nearest_neighbor(arr):
                 nearest_city = tmp_city[j]
                 k = j
                 #print(nearest_city)
-        tmp_arr_pos = tmp_city[0]
-        tmp_city[0] = tmp_city[k]
-        tmp_city[k] = tmp_arr_pos
+
+        # guard against retrieving nonexistent array items
+        if i != cities_length-1:
+            #swap array items
+            tmp_arr_pos = tmp_city[0]
+            tmp_city[0] = tmp_city[k]
+            tmp_city[k] = tmp_arr_pos
         #DELETE TO SEE DIST tmp_nearest_dist_arr.append(tmp_nearest_dist)
         #DELETE TO SEE DIST print("nearest dist arr")
         #DELETE TO SEE DIST print(tmp_nearest_dist_arr)
@@ -108,11 +113,15 @@ def Main():
         test_nearest = nearest_neighbor(cities)
         cities = test_nearest
 
+        ### FOR TESTING PURPOSES
+        print("Greedy algorithm complete.")
+        print("Distance: " + str(totalDist))
+        print("--- %s seconds ---" % (time.time() - start_time))
+        print
+        ### END TESTING
+
         improvement = True
         while improvement:
-
-            # [for testing purposes]
-            print(totalDist)
 
             # initialize to false
             improvement = False
@@ -149,8 +158,8 @@ def Main():
                         # we need to loop again
                         improvement = True
 
-                        # [for testing]
-                        print("Found improvement. i=" + str(i) + " , k=" + str(k))
+                        ### FOR TESTING PURPOSES
+                        print(str(totalDist) + " improvement: i=" + str(i) + " , k=" + str(k))
 
                         break # exit up the chain to repeat the loop
                     
@@ -159,7 +168,13 @@ def Main():
                     break # exit up the chain to repeat the loop
                 
                 i += 1
+
+    ### FOR TESTING PURPOSES
+    print
+    print("Total runtime:")
     print("--- %s seconds ---" % (time.time() - start_time))
+    print("Distance: " + str(totalDist))
+    ### END TESTING
 
     output_tour(cities,totalDist,sys.argv[1] + ".tour")
 
