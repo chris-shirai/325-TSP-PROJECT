@@ -6,6 +6,7 @@
 
 import sys
 import math # for sqrt()
+from copy import deepcopy
 
 #for testing purposes
 import time 
@@ -26,10 +27,10 @@ def Distance(city1,city2):
 def output_tour(arr,len,f_name):
     f_out = open(f_name,"w+")
     #writes length of walk in the first line
-    f_out.write(len+"\n")
+    f_out.write(str(len)+"\n")
     #lists the walk
     for i in arr:
-        f_out.write("%s\n" % i)
+        f_out.write("%s\n" % i[0])
     f_out.close()
 
 # This function takes a route with the starting vertex of 2 edges
@@ -55,6 +56,35 @@ def calcTotalDist(route):
     return var
 
 
+def nearest_neighbor(arr):
+    tmp_city = deepcopy(arr) #copy of the original cities list
+    nn_path = [] #append the near neighbor path to empty list, return it
+    cities_length = len(arr) #of cities
+    #DELETE TO SEE DIST tmp_nearest_dist_arr = []
+    for i in range(cities_length-1):
+        print(i)
+        curr_city = tmp_city.pop(0) #takes current city aka visited
+        nn_path.append(curr_city)
+        nearest_dist = sys.maxsize
+        #nearest_city = None #our cities[element][element] essentialy, the city itself
+        #checks distance from current city to unvisited cities
+        for j in range(len(tmp_city)):
+            k = 0
+            tmp_nearest_dist = Distance(curr_city,tmp_city[j])
+            if nearest_dist > tmp_nearest_dist: #compares which city is the smallest from your current city
+                nearest_dist = tmp_nearest_dist
+                nearest_city = tmp_city[j]
+                k = j
+                #print(nearest_city)
+        tmp_arr_pos = tmp_city[0]
+        tmp_city[0] = tmp_city[k]
+        tmp_city[k] = tmp_arr_pos
+        #DELETE TO SEE DIST tmp_nearest_dist_arr.append(tmp_nearest_dist)
+        #DELETE TO SEE DIST print("nearest dist arr")
+        #DELETE TO SEE DIST print(tmp_nearest_dist_arr)
+    return nn_path
+
+
 
 def Main():
     # open file through command line
@@ -75,6 +105,9 @@ def Main():
         # get the initial total distance
         totalDist = calcTotalDist(cities)
  
+        test_nearest = nearest_neighbor(cities)
+        cities = test_nearest
+
         improvement = True
         while improvement:
 
@@ -127,5 +160,9 @@ def Main():
                 
                 i += 1
     print("--- %s seconds ---" % (time.time() - start_time))
+
+    output_tour(cities,totalDist,sys.argv[1] + ".tour")
+
+
 if __name__ == "__main__":
     Main()
