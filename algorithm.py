@@ -7,6 +7,10 @@
 import sys
 import math # for sqrt()
 
+#for testing purposes
+import time 
+start_time = time.time()
+
 # Distance function takes two of a city argument: list containing ID and coords
 def Distance(city1,city2):
     
@@ -83,14 +87,28 @@ def Main():
             for i in range(1, len(cities)-1):
                 for k in range(i+1, len(cities)):
 
-                    # create a new route with 2-opt switch
-                    newRoute = improve2opt(cities,i,k)
+                    currD1 = Distance(cities[i-1],cities[i])
+                    newD1 = Distance(cities[i-1],cities[k])
 
-                    # calculate distance of new route
-                    newDist = calcTotalDist(newRoute)
+                    if k == len(cities)-1:
+                        currD2 = Distance(cities[k],cities[0])
+                        newD2 = Distance(cities[i],cities[0])
+                    else:
+                        currD2 = Distance(cities[k],cities[k+1])
+                        newD2 = Distance(cities[i],cities[k+1])
+                    
+                    totalCurrD = currD1 + currD2
+                    totalNewD = newD1 + newD2
 
-                    # see if this is an improvement
-                    if newDist < totalDist:
+                    # check if swap is an improvement
+                    if totalNewD < totalCurrD:
+
+                        # create a new route with 2-opt switch
+                        newRoute = improve2opt(cities,i,k)
+
+                        # calculate distance of new route
+                        newDist = calcTotalDist(newRoute)
+
                         # save the distance and new routes
                         totalDist = newDist
                         cities = newRoute
@@ -108,6 +126,6 @@ def Main():
                     break # exit up the chain to repeat the loop
                 
                 i += 1
-
+    print("--- %s seconds ---" % (time.time() - start_time))
 if __name__ == "__main__":
     Main()
