@@ -8,9 +8,10 @@ import sys
 import math # for sqrt()
 from copy import deepcopy
 
-#for testing purposes
+### FOR TESTING PURPOSES
 import time 
 start_time = time.time()
+### END TESTING
 
 # Distance function takes two of a city argument: list containing ID and coords
 def Distance(city1,city2):
@@ -112,14 +113,15 @@ def Main():
         test_nearest = nearest_neighbor(cities)
         cities = test_nearest
 
-        for city in cities:
-            print(city)
+        ### FOR TESTING PURPOSES
+        print("Greedy algorithm complete.")
+        print("Distance: " + str(totalDist))
+        print("--- %s seconds ---" % (time.time() - start_time))
+        print
+        ### END TESTING
 
         improvement = True
         while improvement:
-
-            # [for testing purposes]
-            print(totalDist)
 
             # initialize to false
             improvement = False
@@ -156,8 +158,8 @@ def Main():
                         # we need to loop again
                         improvement = True
 
-                        # [for testing]
-                        print("Found improvement. i=" + str(i) + " , k=" + str(k))
+                        ### FOR TESTING PURPOSES
+                        print(str(totalDist) + " improvement: i=" + str(i) + " , k=" + str(k))
 
                         break # exit up the chain to repeat the loop
                     
@@ -166,7 +168,13 @@ def Main():
                     break # exit up the chain to repeat the loop
                 
                 i += 1
+
+    ### FOR TESTING PURPOSES
+    print
+    print("Total runtime:")
     print("--- %s seconds ---" % (time.time() - start_time))
+    print("Distance: " + str(totalDist))
+    ### END TESTING
 
     output_tour(cities,totalDist,sys.argv[1] + ".tour")
 
