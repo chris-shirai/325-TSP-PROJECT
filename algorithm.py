@@ -57,102 +57,6 @@ def calcTotalDist(route):
     return var
 
 
-def nearest_neighbor(arr):
-    tmp_city = deepcopy(arr) #copy of the original cities list
-    nn_path = [] #append the near neighbor path to empty list, return it
-    cities_length = len(arr) #of cities
-    #DELETE TO SEE DIST tmp_nearest_dist_arr = []
-    for i in range(cities_length):
-        print(i)
-        curr_city = tmp_city.pop(0) #takes current city aka visited
-        nn_path.append(curr_city)
-        nearest_dist = sys.maxsize
-        #nearest_city = None #our cities[element][element] essentialy, the city itself
-        #checks distance from current city to unvisited cities
-        for j in range(len(tmp_city)):
-            k = 0
-            tmp_nearest_dist = Distance(curr_city,tmp_city[j])
-            if nearest_dist > tmp_nearest_dist: #compares which city is the smallest from your current city
-                nearest_dist = tmp_nearest_dist
-                nearest_city = tmp_city[j]
-                k = j
-                #print(nearest_city)
-
-        # guard against retrieving nonexistent array items
-        if i != cities_length-1:
-            #swap array items
-            tmp_arr_pos = tmp_city[0]
-            tmp_city[0] = tmp_city[k]
-            tmp_city[k] = tmp_arr_pos
-        #DELETE TO SEE DIST tmp_nearest_dist_arr.append(tmp_nearest_dist)
-        #DELETE TO SEE DIST print("nearest dist arr")
-        #DELETE TO SEE DIST print(tmp_nearest_dist_arr)
-    return nn_path
-
-
-def two_opt(c_arr,totalDist_in, diff):
-    a = 1
-    #set amount
-    difference = diff
-
-    improvement = True
-    while improvement:
-
-        # initialize to false
-        improvement = False
-
-        for i in range(1, len(c_arr) - 1):
-            for k in range(i + 1, len(c_arr)):
-
-                currD1 = Distance(c_arr[i - 1], c_arr[i])
-                newD1 = Distance(c_arr[i - 1], c_arr[k])
-
-                if k == len(c_arr) - 1:
-                    currD2 = Distance(c_arr[k], c_arr[0])
-                    newD2 = Distance(c_arr[i], c_arr[0])
-                else:
-                    currD2 = Distance(c_arr[k], c_arr[k + 1])
-                    newD2 = Distance(c_arr[i], c_arr[k + 1])
-
-                totalCurrD = currD1 + currD2
-                totalNewD = newD1 + newD2
-
-                # check if swap is an improvement
-                if totalNewD < totalCurrD - difference:
-                    # create a new route with 2-opt switch
-                    newRoute = improve2opt(c_arr, i, k)
-
-                    # calculate distance of new route
-                    #newDist = calcTotalDist(newRoute)
-
-                    # save the distance and new routes
-                    totalDist_in[0] = totalDist_in[0] + totalNewD - totalCurrD
-                    c_arr = newRoute
-
-                    # we need to loop again
-                    improvement = True
-
-                    a=i
-
-                    ### FOR TESTING PURPOSES
-                    print(str(totalDist_in[0]) + " improvement: i=" + str(i) + " , k=" + str(k))
-
-                    break  # exit up the chain to repeat the loop
-
-                k += 1
-            if improvement:
-                break  # exit up the chain to repeat the loop
-
-            i += 1
-    return c_arr
-
-
-#returns a difference to use depending on number of cities
-def calc_difference(c_size):
-    if c_size > 1000:
-        return 200
-    else:
-        return 0
 
 
 def Main():
@@ -172,33 +76,94 @@ def Main():
         # cities[line[2]]: y-coord
 
         # get the initial total distance
-        totalDist = [0]
-        totalDist[0] = calcTotalDist(cities)
-
-        #calc the difference to use
-        difference = calc_difference(len(cities))
+        totalDist = calcTotalDist(cities)
+ 
         #test_nearest = nearest_neighbor(cities)
         #cities = test_nearest
 
         ### FOR TESTING PURPOSES
         print("Greedy algorithm complete.")
-        print("Distance: " + str(totalDist[0]))
+        print("Distance: " + str(totalDist))
         print("--- %s seconds ---" % (time.time() - start_time))
         print
         ### END TESTING
 
+        timeRemaining = True
 
-        #2opt function
-        cities = two_opt(cities,totalDist,difference)
+        # if an entire loop completes without an improvement,
+        # currLoopImprov finishes True; end program.
+        currLoopImprov = False
+
+        while 1 and timeRemaining and not currLoopImprov:
+            loopStart=1
+
+            currLoopImprov = True
+
+            improvement = True
+            timeRemaining = True
+
+            while timeRemaining and improvement:
+
+                improvement = False
+
+                for i in range(loopStart, len(cities)-1):
+                    for k in range(i+1, len(cities)):
+
+                        currD1 = Distance(cities[i-1],cities[i])
+                        newD1 = Distance(cities[i-1],cities[k])
+
+                        if k == len(cities)-1:
+                            currD2 = Distance(cities[k],cities[0])
+                            newD2 = Distance(cities[i],cities[0])
+                        else:
+                            currD2 = Distance(cities[k],cities[k+1])
+                            newD2 = Distance(cities[i],cities[k+1])
+                        
+                        totalCurrD = currD1 + currD2
+                        totalNewD = newD1 + newD2
+
+                        # check if swap is an improvement
+                        if totalNewD < totalCurrD: # - difference:
+
+                            # create a new route with 2-opt switch
+                            newRoute = improve2opt(cities,i,k)
+
+                            # save the distance and new routes
+                            totalDist = totalDist + totalNewD - totalCurrD
+                            cities = newRoute
+
+                            # we need to loop again
+                            improvement = True
+
+                            # after exiting loop, resume at i
+                            loopStart=i
+
+                            currLoopImprov = False
+
+                            ### FOR TESTING PURPOSES
+                            print(str(totalDist) + " " + str((time.time() - start_time)) + " improvement: i=" + str(i) + " , k=" + str(k))
+
+                            if (time.time() - start_time) > 179.99:
+                                timeRemaining = False
+                            break # exit up the chain to repeat the loop
+
+                        if (time.time() - start_time) > 179.99:
+                            timeRemaining = False
+                            break
+                        k += 1
+                    if improvement:
+                        break # exit up the chain to repeat the loop
+                    
+                    i += 1
 
     ### FOR TESTING PURPOSES
     print
     print("Total runtime:")
     print("--- %s seconds ---" % (time.time() - start_time))
-    print("Distance: " + str(totalDist[0]))
+    print("Distance: " + str(totalDist))
     ### END TESTING
 
-    output_tour(cities,totalDist[0],sys.argv[1] + ".tour")
+    output_tour(cities,totalDist,sys.argv[1] + ".tour")
 
 
 if __name__ == "__main__":
