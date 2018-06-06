@@ -14,13 +14,16 @@ start_time = time.time()
 ### END TESTING
 
 # Distance function takes two of a city argument: list containing ID and coords
-def Distance(city1,city2):
+def Distance(city1,city2, distMemos):
     
     # get the exact distance in a decimal
     dist = math.sqrt((city1[1]-city2[1])**2 + (city1[2]-city2[2])**2)
 
     # round to nearest int
     nearestInt = int(round(dist))
+
+    distMemos[city1[0]][city2[0]] = nearestInt
+    distMemos[city2[0]][city1[0]] = nearestInt
 
     return nearestInt
 
@@ -45,18 +48,16 @@ def improve2opt(route,i,k):
     return new_route
 
 # calculates the total distance of a route
-def calcTotalDist(route):
+def calcTotalDist(route, distMemos):
     var = 0
     for line in range(len(route)):
         if line == 0:
             # distance from last vertex to 0
-            var += Distance(route[0],route[len(route)-1])
+            var += Distance(route[0],route[len(route)-1], distMemos)
         else:
             # distance from previous vertex to this
-            var += Distance(route[line-1],route[line])
+            var += Distance(route[line-1],route[line], distMemos)
     return var
-
-
 
 
 def Main():
@@ -74,19 +75,13 @@ def Main():
         # cities[line[0]]: City ID
         # cities[line[1]]: x-coord
         # cities[line[2]]: y-coord
+        distMemos = [[None for x in range(len(cities))] for y in range(len(cities))]
 
         # get the initial total distance
-        totalDist = calcTotalDist(cities)
+        totalDist = calcTotalDist(cities, distMemos)
  
-        #test_nearest = nearest_neighbor(cities)
-        #cities = test_nearest
-
-        ### FOR TESTING PURPOSES
-        print("Greedy algorithm complete.")
-        print("Distance: " + str(totalDist))
-        print("--- %s seconds ---" % (time.time() - start_time))
-        print
-        ### END TESTING
+        # create a memos list
+        distMemos = [[None for x in range(len(cities))] for y in range(len(cities))]
 
         timeRemaining = True
 
@@ -109,15 +104,38 @@ def Main():
                 for i in range(loopStart, len(cities)-1):
                     for k in range(i+1, len(cities)):
 
-                        currD1 = Distance(cities[i-1],cities[i])
-                        newD1 = Distance(cities[i-1],cities[k])
+                        if distMemos[cities[i-1][0]][cities[i][0]] == None:
+                            currD1 = Distance(cities[i-1],cities[i], distMemos)
+                        else:
+                            currD1 = distMemos[cities[i-1][0]][cities[i][0]]
+
+                        if distMemos[cities[i-1][0]][cities[k][0]] == None:
+                            newD1 = Distance(cities[i-1],cities[k], distMemos)
+                        else:
+                            newD1 = distMemos[cities[i-1][0]][cities[k][0]]
+
 
                         if k == len(cities)-1:
-                            currD2 = Distance(cities[k],cities[0])
-                            newD2 = Distance(cities[i],cities[0])
+                            if distMemos[cities[k][0]][cities[0][0]] == None:
+                                currD2 = Distance(cities[k],cities[0], distMemos)
+                            else:
+                                currD2 = distMemos[cities[k][0]][cities[0][0]]
                         else:
-                            currD2 = Distance(cities[k],cities[k+1])
-                            newD2 = Distance(cities[i],cities[k+1])
+                            if distMemos[cities[k][0]][cities[k+1][0]] == None:
+                                currD2 = Distance(cities[k],cities[k+1], distMemos)
+                            else:
+                                currD2 = distMemos[cities[k][0]][cities[k+1][0]]
+
+                        if k == len(cities)-1:
+                            if distMemos[cities[i][0]][cities[0][0]] == None:
+                                newD2 = Distance(cities[i],cities[0], distMemos)
+                            else:
+                                newD2 = distMemos[cities[i][0]][cities[0][0]]
+                        else:
+                            if distMemos[cities[i][0]][cities[k+1][0]] == None:
+                                newD2 = Distance(cities[i],cities[k+1], distMemos)
+                            else:
+                                newD2 = distMemos[cities[i][0]][cities[k+1][0]]
                         
                         totalCurrD = currD1 + currD2
                         totalNewD = newD1 + newD2
@@ -143,11 +161,11 @@ def Main():
                             ### FOR TESTING PURPOSES
                             print(str(totalDist) + " " + str((time.time() - start_time)) + " improvement: i=" + str(i) + " , k=" + str(k))
 
-                            if (time.time() - start_time) > 179.99:
+                            if (time.time() - start_time) > 179.95:
                                 timeRemaining = False
                             break # exit up the chain to repeat the loop
 
-                        if (time.time() - start_time) > 179.99:
+                        if (time.time() - start_time) > 179.95:
                             timeRemaining = False
                             break
                         k += 1
