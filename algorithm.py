@@ -90,6 +90,56 @@ def nearest_neighbor(arr):
     return nn_path
 
 
+def two_opt(c_arr,totalDist_in):
+    improvement = True
+    while improvement:
+
+        # initialize to false
+        improvement = False
+
+        for i in range(1, len(c_arr) - 1):
+            for k in range(i + 1, len(c_arr)):
+
+                currD1 = Distance(c_arr[i - 1], c_arr[i])
+                newD1 = Distance(c_arr[i - 1], c_arr[k])
+
+                if k == len(c_arr) - 1:
+                    currD2 = Distance(c_arr[k], c_arr[0])
+                    newD2 = Distance(c_arr[i], c_arr[0])
+                else:
+                    currD2 = Distance(c_arr[k], c_arr[k + 1])
+                    newD2 = Distance(c_arr[i], c_arr[k + 1])
+
+                totalCurrD = currD1 + currD2
+                totalNewD = newD1 + newD2
+
+                # check if swap is an improvement
+                if totalNewD < totalCurrD:
+                    # create a new route with 2-opt switch
+                    newRoute = improve2opt(c_arr, i, k)
+
+                    # calculate distance of new route
+                    newDist = calcTotalDist(newRoute)
+
+                    # save the distance and new routes
+                    totalDist_in[0] = newDist
+                    c_arr = newRoute
+
+                    # we need to loop again
+                    improvement = True
+
+                    ### FOR TESTING PURPOSES
+                    print(str(totalDist_in[0]) + " improvement: i=" + str(i) + " , k=" + str(k))
+
+                    break  # exit up the chain to repeat the loop
+
+                k += 1
+            if improvement:
+                break  # exit up the chain to repeat the loop
+
+            i += 1
+    return c_arr
+
 
 def Main():
     # open file through command line
@@ -108,75 +158,31 @@ def Main():
         # cities[line[2]]: y-coord
 
         # get the initial total distance
-        totalDist = calcTotalDist(cities)
+        totalDist = [0]
+        totalDist[0] = calcTotalDist(cities)
  
         test_nearest = nearest_neighbor(cities)
         cities = test_nearest
 
         ### FOR TESTING PURPOSES
         print("Greedy algorithm complete.")
-        print("Distance: " + str(totalDist))
+        print("Distance: " + str(totalDist[0]))
         print("--- %s seconds ---" % (time.time() - start_time))
         print
         ### END TESTING
 
-        improvement = True
-        while improvement:
 
-            # initialize to false
-            improvement = False
-
-            for i in range(1, len(cities)-1):
-                for k in range(i+1, len(cities)):
-
-                    currD1 = Distance(cities[i-1],cities[i])
-                    newD1 = Distance(cities[i-1],cities[k])
-
-                    if k == len(cities)-1:
-                        currD2 = Distance(cities[k],cities[0])
-                        newD2 = Distance(cities[i],cities[0])
-                    else:
-                        currD2 = Distance(cities[k],cities[k+1])
-                        newD2 = Distance(cities[i],cities[k+1])
-                    
-                    totalCurrD = currD1 + currD2
-                    totalNewD = newD1 + newD2
-
-                    # check if swap is an improvement
-                    if totalNewD < totalCurrD:
-
-                        # create a new route with 2-opt switch
-                        newRoute = improve2opt(cities,i,k)
-
-                        # calculate distance of new route
-                        newDist = calcTotalDist(newRoute)
-
-                        # save the distance and new routes
-                        totalDist = newDist
-                        cities = newRoute
-
-                        # we need to loop again
-                        improvement = True
-
-                        ### FOR TESTING PURPOSES
-                        print(str(totalDist) + " improvement: i=" + str(i) + " , k=" + str(k))
-
-                        break # exit up the chain to repeat the loop
-                    
-                    k += 1
-                if improvement:
-                    break # exit up the chain to repeat the loop
-                
-                i += 1
+        #2opt function
+        cities = two_opt(cities,totalDist)
 
     ### FOR TESTING PURPOSES
     print
     print("Total runtime:")
     print("--- %s seconds ---" % (time.time() - start_time))
-    print("Distance: " + str(totalDist))
+    print("Distance: " + str(totalDist[0]))
     ### END TESTING
 
-    output_tour(cities,totalDist,sys.argv[1] + ".tour")
+    output_tour(cities,totalDist[0],sys.argv[1] + ".tour")
 
 
 if __name__ == "__main__":
