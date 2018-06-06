@@ -90,7 +90,11 @@ def nearest_neighbor(arr):
     return nn_path
 
 
-def two_opt(c_arr,totalDist_in):
+def two_opt(c_arr,totalDist_in, diff):
+    a = 1
+    #set amount
+    difference = diff
+
     improvement = True
     while improvement:
 
@@ -114,19 +118,21 @@ def two_opt(c_arr,totalDist_in):
                 totalNewD = newD1 + newD2
 
                 # check if swap is an improvement
-                if totalNewD < totalCurrD:
+                if totalNewD < totalCurrD - difference:
                     # create a new route with 2-opt switch
                     newRoute = improve2opt(c_arr, i, k)
 
                     # calculate distance of new route
-                    newDist = calcTotalDist(newRoute)
+                    #newDist = calcTotalDist(newRoute)
 
                     # save the distance and new routes
-                    totalDist_in[0] = newDist
+                    totalDist_in[0] = totalDist_in[0] + totalNewD - totalCurrD
                     c_arr = newRoute
 
                     # we need to loop again
                     improvement = True
+
+                    a=i
 
                     ### FOR TESTING PURPOSES
                     print(str(totalDist_in[0]) + " improvement: i=" + str(i) + " , k=" + str(k))
@@ -139,6 +145,14 @@ def two_opt(c_arr,totalDist_in):
 
             i += 1
     return c_arr
+
+
+#returns a difference to use depending on number of cities
+def calc_difference(c_size):
+    if c_size > 1000:
+        return 200
+    else:
+        return 0
 
 
 def Main():
@@ -160,9 +174,11 @@ def Main():
         # get the initial total distance
         totalDist = [0]
         totalDist[0] = calcTotalDist(cities)
- 
-        test_nearest = nearest_neighbor(cities)
-        cities = test_nearest
+
+        #calc the difference to use
+        difference = calc_difference(len(cities))
+        #test_nearest = nearest_neighbor(cities)
+        #cities = test_nearest
 
         ### FOR TESTING PURPOSES
         print("Greedy algorithm complete.")
@@ -173,7 +189,7 @@ def Main():
 
 
         #2opt function
-        cities = two_opt(cities,totalDist)
+        cities = two_opt(cities,totalDist,difference)
 
     ### FOR TESTING PURPOSES
     print
