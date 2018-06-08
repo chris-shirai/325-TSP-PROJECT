@@ -59,6 +59,12 @@ def calcTotalDist(route, distMemos):
             var += Distance(route[line-1],route[line], distMemos)
     return var
 
+#limits the rate to 3 minutes if the number of cities is < 5050
+def rate_limit(len_c):
+    if len_c > 5050:
+        return 1200.00
+    else:
+        return 179.95
 
 def Main():
     # open file through command line
@@ -79,7 +85,8 @@ def Main():
 
         # get the initial total distance
         totalDist = calcTotalDist(cities, distMemos)
- 
+        #rate limiter
+        rate = rate_limit(len(cities))
         # create a memos list
         distMemos = [[None for x in range(len(cities))] for y in range(len(cities))]
 
@@ -161,11 +168,11 @@ def Main():
                             ### FOR TESTING PURPOSES
                             print(str(totalDist) + " " + str((time.time() - start_time)) + " improvement: i=" + str(i) + " , k=" + str(k))
 
-                            if (time.time() - start_time) > 179.95:
+                            if (time.time() - start_time) > rate:
                                 timeRemaining = False
                             break # exit up the chain to repeat the loop
 
-                        if (time.time() - start_time) > 179.95:
+                        if (time.time() - start_time) > rate:
                             timeRemaining = False
                             break
                         k += 1
